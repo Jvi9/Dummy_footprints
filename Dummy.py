@@ -31,6 +31,9 @@ class Dummy:
         self.yaw = yaw
         self.pitch = pitch
         self.heading = heading
+        self.footprint = None
+        
+        self.load_images() #Autocall the images data
         
     def load_images(self):
         img_path = os.path.join(self.image_path, self.name)
@@ -123,18 +126,26 @@ class Dummy:
         projected_corners_ground = self.project_to_ground(rotated_corners)
 
         # Convert to geographic coordinates
-        geographic_corners = self.to_geographic_coordinates(projected_corners_ground)
+        self.footprint = self.to_geographic_coordinates(projected_corners_ground)
 
-        return geographic_corners  # List of (lat, lon) tuples
+        return self.footprint  # List of (lat, lon) tuples
     
     
 image_path = r'C:\Users\jvila\Desktop\Development_area\CANON_PHOTOS'
 
-dummy1 = Dummy('20241023_104900_px_8J4A8673.JPG',image_path,37.17006816,-121.65122667666668, 8536.4457, 0, 45, 20)   
-# print(dummy1.rotation_matrix())
-print(dummy1.calculate_camera_footprint())
+image_names = [f for f in os.listdir(image_path) if f.endswith(".JPG")]
+dummy_dict = {}
+for i in image_names:  # Look for the images
+    dummy_dict[i] = Dummy(name=i,image_path=image_path, lat=0, lon=0, alt=10000, yaw=0, pitch=0, heading=0)
 
-polygon = Polygon(dummy1.calculate_camera_footprint())
+first_key, first_value = next(iter(dummy_dict.items()))
+print(f"Key: {first_key}, Value img: {first_value.image}")
 
-dummy1.load_images()
-dummy1.image
+""" If you want to calculate the footprint you have to initiate the method
+    called calculate_camera_footprint  and then just call the .footprint
+    this is to save time when we do not need the footprint of every dummy"""
+    
+dummy_dict[image_names[0]].name
+dummy1 = dummy_dict['20241023_104900_px_8J4A8673.JPG']
+dummy1.calculate_camera_footprint() # first you have to use the method to calculate the footprint of any
+dummy1.footprint
